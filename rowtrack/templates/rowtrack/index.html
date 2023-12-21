@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h1 class="text-4xl font-bold">Rowing machines</h1>
+    <p>Please select the rowing machine</p>
+    <div class="flex items-center justify-center gap-2">
+        {% for row_machine in row_machines %}
+            <a href="{% url 'rowMachine' row_machine.slug %}" class="rounded-md px-6 py-2 bg-gray-500 text-light">
+                {{ row_machine.name }}
+            </a>
+        {% endfor %}
+    </div>
+    <div class="footer"></div>
+
+
+{% endblock content %}

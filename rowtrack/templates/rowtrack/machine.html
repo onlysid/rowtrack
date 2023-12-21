@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h1 class="font-bold text-4xl">Rowing Machine #{{row_machine.name}}</h1>
+    <form method="post" class="flex justify-center items-center gap-2">
+        {% csrf_token %}
+        <input id="messageInput" type="text" name="message" placeholder="Enter message" class="py-2 px-3 rounded-md shadow-md">
+        <input id="sendButton" type="submit" value="Send" class="bg-dark rounded-md text-light transition-all py-2 px-3 shadow-md hover:bg-light hover:text-dark cursor-pointer">
+    </form>
+    <div class="footer flex flex-col items-center text-center">
+        <h2 class="text-xl font-medium">Output:</h2>
+    </div>
+
+    {{ row_machine.slug|json_script:"row-machine-slug" }}
+    <script>
+        const rowMachineSlug = JSON.parse(document.getElementById('row-machine-slug').textContent);
+        const machineSocket = new WebSocket(
+            'wss://'
+            + window.location.host
+            + '/ws/'
+            + rowMachineSlug
+            + '/'
+        );
+
+        machineSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            document.querySelector('.footer').innerHTML += ('<p>' + data.message + '</p>');
+        };
+
+        machineSocket.onclose = function(e) {
+            console.error('Machine socket closed unexpectedly');
+        };
+
+        document.getElementById('sendButton').onclick = function(e) {
+            e.preventDefault();
+            const messageInputDom = document.getElementById('messageInput');
+            const message = messageInputDom.value;
+            machineSocket.send(JSON.stringify({
+                'message': message
+            }));
+            messageInputDom.value = '';
+        };
+    </script>
+
+
+{% endblock content %}
